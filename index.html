@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="kn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-title" content="ರೇಡಿಯೋ">
+<meta name="theme-color" content="#1b1b1b">
+<title>ರೇಡಿಯೋ</title>
+<style>
+  :root { --bg:#111; --fg:#fff; --tile:#262626; --on:#f5b301; --onfg:#111; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { margin:0; background:var(--bg); color:var(--fg);
+    font-family:"Kannada Sangam MN","Noto Sans Kannada",system-ui,sans-serif; }
+  header { position:sticky; top:0; z-index:2; background:var(--bg);
+    padding:calc(env(safe-area-inset-top) + 12px) 16px 12px; border-bottom:2px solid #333; }
+  #now { font-size:24px; line-height:1.4; min-height:2.8em; }
+  #now b { color:var(--on); }
+  main { padding:12px 12px calc(env(safe-area-inset-bottom) + 24px); display:grid; gap:12px; }
+  h2 { margin:20px 4px 0; font-size:22px; color:#bbb; font-weight:normal; border-bottom:1px solid #333; padding-bottom:6px; }
+  h2:first-child { margin-top:4px; }
+  button.st { width:100%; min-height:84px; border:0; border-radius:16px; background:var(--tile);
+    color:var(--fg); font:inherit; font-size:28px; text-align:left; padding:14px 20px;
+    display:flex; align-items:center; gap:16px; }
+  button.st .ic { width:40px; font-size:32px; text-align:center; flex:none; }
+  button.st[aria-pressed="true"] { background:var(--on); color:var(--onfg); font-weight:bold; }
+  button.st:active { transform:scale(.98); }
+</style>
+</head>
+<body>
+<header><div id="now" role="status" aria-live="polite">ಕೇಳಲು ಒಂದು ಸ್ಟೇಷನ್ ಒತ್ತಿ</div></header>
+<main id="list"></main>
+<audio id="a" preload="none" playsinline></audio>
+<script>
+const S = [{"n": "ವಿವಿಧ ಭಾರತಿ", "u": "https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio026/hlspbaudio02664kbps.m3u8", "g": "pub"}, {"n": "ಆಕಾಶವಾಣಿ ಬೆಂಗಳೂರು", "u": "https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio030/hlspbaudio030_Auto.m3u8", "g": "pub"}, {"n": "ಕಾಮನಬಿಲ್ಲು ಎಫ್‌ಎಂ", "u": "https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio027/hlspbaudio02764kbps.m3u8", "g": "pub"}, {"n": "ರಾಗಂ (ಶಾಸ್ತ್ರೀಯ ಸಂಗೀತ)", "u": "https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudioragam/hlspbaudioragam_Auto.m3u8", "g": "pub"}, {"n": "ಆಕಾಶವಾಣಿ ಕನ್ನಡ", "u": "https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio026/hlspbaudio02664kbps.m3u8", "g": "pub"}, {"n": "ಆಕಾಶವಾಣಿ ಮೈಸೂರು", "u": "https://radio.wavespb.com/live/9d18e57ddfb1d4b4/9d18e57ddfb1d4b4.m3u8", "g": "pub"}, {"n": "ಆಕಾಶವಾಣಿ ಧಾರವಾಡ", "u": "https://radio.wavespb.com/live/449dcf0b33491e65/449dcf0b33491e65.m3u8", "g": "pub"}, {"n": "ಆಕಾಶವಾಣಿ ಹಾಸನ", "u": "https://radio.wavespb.com/live/9b1044084099f01c/9b1044084099f01c.m3u8", "g": "pub"}, {"n": "ಆಕಾಶವಾಣಿ ಮಂಗಳೂರು", "u": "https://radio.wavespb.com/live/3c522579906d4dcb/3c522579906d4dcb.m3u8", "g": "pub"}, {"n": "ಆಕಾಶವಾಣಿ ಮಡಿಕೇರಿ", "u": "https://radio.wavespb.com/live/5f58506ab7d090ec/5f58506ab7d090ec.m3u8", "g": "pub"}, {"n": "ಆಕಾಶವಾಣಿ ಚಿತ್ರದುರ್ಗ", "u": "https://radio.wavespb.com/live/c0b739e6443d99be/c0b739e6443d99be.m3u8", "g": "pub"}, {"n": "ಆಕಾಶವಾಣಿ ಕಲಬುರಗಿ", "u": "https://radio.wavespb.com/live/9b085f63b2c25275/9b085f63b2c25275.m3u8", "g": "pub"}, {"n": "ಆಕಾಶವಾಣಿ ವಿಜಯಪುರ", "u": "https://radio.wavespb.com/live/8a8894314ac7be31/8a8894314ac7be31.m3u8", "g": "pub"}, {"n": "ಆಕಾಶವಾಣಿ ರಾಯಚೂರು", "u": "https://radio.wavespb.com/live/e39bab8a1a843e9e/e39bab8a1a843e9e.m3u8", "g": "pub"}, {"n": "ಆಕಾಶವಾಣಿ ಹೊಸಪೇಟೆ", "u": "https://radio.wavespb.com/live/113d144f4ecf1dd5/113d144f4ecf1dd5.m3u8", "g": "pub"}, {"n": "ಆಕಾಶವಾಣಿ ಕಾರವಾರ", "u": "https://radio.wavespb.com/live/723ab703b250900f/723ab703b250900f.m3u8", "g": "pub"}, {"n": "ಆಕಾಶವಾಣಿ ಬಳ್ಳಾರಿ", "u": "https://radio.wavespb.com/live/5a457983e1e7e12f/5a457983e1e7e12f.m3u8", "g": "pub"}, {"n": "ಮಿರ್ಚಿ ಎಫ್‌ಎಂ", "u": "https://stream.zeno.fm/wgaznsmt92quv", "g": "pvt"}, {"n": "ರೆಡ್ ಎಫ್‌ಎಂ", "u": "https://stream.zeno.fm/9phrkb1e3v8uv", "g": "pvt"}, {"n": "ಗಿರ್ಮಿಟ್ ರೇಡಿಯೋ", "u": "https://stream.radiojar.com/g6dgm6m6p3hvv", "g": "pvt"}, {"n": "ನಮ್ಮ ರೇಡಿಯೋ", "u": "https://stream.zeno.fm/6quh1pfnt1duv", "g": "pvt"}, {"n": "ಸುನೋ ಕನ್ನಡ", "u": "https://playerservices.streamtheworld.com/api/livestream-redirect/RADIO_SUNO_MELODY_S06_SC", "g": "pvt"}, {"n": "ಸಕ್ಕತ್ ರೇಡಿಯೋ", "u": "https://stream.zeno.fm/3e6k4ryerd0uv.aac", "g": "pvt"}, {"n": "ಮಧುರ ತರಂಗ", "u": "https://artemis.streamerr.co/listen/madhur_tarang/radio.mp3", "g": "pvt"}];
+const a = document.getElementById('a'), now = document.getElementById('now'), list = document.getElementById('list');
+const GROUP = { pub: 'ಸರ್ಕಾರಿ ರೇಡಿಯೋ — ಆಕಾಶವಾಣಿ', pvt: 'ಖಾಸಗಿ ರೇಡಿಯೋ' };
+const kn = new Intl.Collator('kn');
+S.sort((x, y) => (x.g === y.g ? kn.compare(x.n, y.n) : (x.g === 'pub' ? -1 : 1)));
+let cur = -1;
+const MSG = {
+  idle: 'ಕೇಳಲು ಒಂದು ಸ್ಟೇಷನ್ ಒತ್ತಿ',          // tap a station to listen
+  load: n => `<b>${n}</b> — ಬರುತ್ತಿದೆ…`,          // coming…
+  play: n => `ಈಗ ಕೇಳುತ್ತಿದೆ: <b>${n}</b>`,       // now playing
+  stop: n => `<b>${n}</b> ನಿಲ್ಲಿಸಲಾಗಿದೆ`,          // stopped
+  err:  n => `<b>${n}</b> ಸಿಗುತ್ತಿಲ್ಲ. ಬೇರೆ ಸ್ಟೇಷನ್ ಒತ್ತಿ` // not available, tap another
+};
+const btns = S.map((s, i) => {
+  if (i === 0 || S[i - 1].g !== s.g) { const h = document.createElement('h2'); h.textContent = GROUP[s.g]; list.appendChild(h); }
+  const b = document.createElement('button');
+  b.className = 'st'; b.setAttribute('aria-pressed', 'false');
+  b.innerHTML = `<span class="ic" aria-hidden="true">▶</span><span>${s.n}</span>`;
+  b.onclick = () => (i === cur && !a.paused) ? stop() : play(i);
+  list.appendChild(b); return b;
+});
+function mark() {
+  btns.forEach((b, i) => {
+    const on = i === cur && !a.paused;
+    b.setAttribute('aria-pressed', on);
+    b.querySelector('.ic').textContent = on ? '■' : '▶';
+  });
+}
+function play(i) {
+  cur = (i + S.length) % S.length;
+  const s = S[cur];
+  localStorage.setItem('last', s.u);
+  now.innerHTML = MSG.load(s.n);
+  a.src = s.u; a.play().catch(() => { now.innerHTML = MSG.err(s.n); mark(); });
+  if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: s.n, artist: 'ರೇಡಿಯೋ' });
+  mark();
+  btns[cur].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+function stop() { a.pause(); a.removeAttribute('src'); a.load(); now.innerHTML = MSG.stop(S[cur].n); mark(); }
+a.addEventListener('playing', () => { now.innerHTML = MSG.play(S[cur].n); mark(); });
+a.addEventListener('error',   () => { if (cur >= 0 && a.getAttribute('src')) { now.innerHTML = MSG.err(S[cur].n); mark(); } });
+if ('mediaSession' in navigator) {             // lock screen / Control Center: next / previous station
+  navigator.mediaSession.setActionHandler('nexttrack',     () => play(cur + 1));
+  navigator.mediaSession.setActionHandler('previoustrack', () => play(cur - 1));
+  navigator.mediaSession.setActionHandler('play',  () => play(cur < 0 ? 0 : cur));
+  navigator.mediaSession.setActionHandler('pause', () => stop());
+}
+const last = S.findIndex(s => s.u === localStorage.getItem('last'));   // highlight where she left off
+if (last >= 0) btns[last].style.outline = '3px solid var(--on)';
+</script>
+</body>
+</html>
